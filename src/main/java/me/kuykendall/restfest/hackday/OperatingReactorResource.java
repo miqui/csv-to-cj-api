@@ -29,7 +29,7 @@ public class OperatingReactorResource {
     @GET
     @Path("/{docketNumber}")
     @Produces({MediaType.COLLECTION_JSON, javax.ws.rs.core.MediaType.APPLICATION_JSON})
-    public Response getInsultAsCj(@PathParam("docketNumber") String docketNumber) {
+    public Response getInsultAsCj(@PathParam("docketNumber") String docketNumber) throws Exception {
         OperatingReactorDAO operatingReactorDAO = new XLSOperatingReactorDAO();
         OperatingReactor operatingReactor = operatingReactorDAO.getOperatingReactorByDocketNumber(docketNumber);
 
