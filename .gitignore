@@ -86,3 +86,5 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 
+/csv-to-cj-api.iml
+/.idea/
