@@ -1,6 +1,7 @@
 package me.kuykendall.restfest.hackday.dao;
 
 import me.kuykendall.restfest.hackday.OperatingReactorQueryInfo;
+import me.kuykendall.restfest.hackday.model.Hyperlink;
 import me.kuykendall.restfest.hackday.model.OperatingReactor;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
@@ -17,7 +18,7 @@ public class XLSOperatingReactorDAO implements OperatingReactorDAO {
     private static Map<String, OperatingReactor> operatingReactors;
 
     @Override
-    public OperatingReactor getOperatingReactorByDocketNumber(String docketNumber){
+    public OperatingReactor getOperatingReactorByDocketNumber(String docketNumber) {
         OperatingReactor reactor = getOperatingReactors().get(docketNumber);
         return reactor;
     }
@@ -53,13 +54,17 @@ public class XLSOperatingReactorDAO implements OperatingReactorDAO {
 
                 // Process row of sheet
                 OperatingReactor operatingReactor = new OperatingReactor();
-                operatingReactor.setPlantName(formatter.formatCellValue(row.getCell(0)));
-                operatingReactor.setWebPage(formatter.formatCellValue(row.getCell(1)));
                 operatingReactor.setDocketNumber(formatter.formatCellValue(row.getCell(2)));
-
                 if (operatingReactor.getDocketNumber().equals("")) {
                     continue;
                 }
+                operatingReactor.setPlantName(formatter.formatCellValue(row.getCell(0)));
+                operatingReactor.setWebPage(new Hyperlink(
+                        row.getCell(1).getHyperlink().getLabel(),
+                        row.getCell(1).getHyperlink().getAddress()
+                ));
+
+
 
                 operatingReactors.put(operatingReactor.getDocketNumber(), operatingReactor);
             }

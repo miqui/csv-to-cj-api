@@ -2,7 +2,7 @@ package me.kuykendall.restfest.hackday.model;
 
 public class OperatingReactor {
     private String plantName;
-    private String webPage;
+    private Hyperlink webPage;
     private String docketNumber;
 
     public String getPlantName() {
@@ -13,11 +13,11 @@ public class OperatingReactor {
         this.plantName = plantName;
     }
 
-    public String getWebPage() {
+    public Hyperlink getWebPage() {
         return webPage;
     }
 
-    public void setWebPage(String webPage) {
+    public void setWebPage(Hyperlink webPage) {
         this.webPage = webPage;
     }
 

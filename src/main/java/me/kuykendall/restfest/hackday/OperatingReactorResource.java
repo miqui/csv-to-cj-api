@@ -16,6 +16,7 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +30,7 @@ public class OperatingReactorResource {
 
     @GET
     @Produces({MediaType.COLLECTION_JSON, javax.ws.rs.core.MediaType.APPLICATION_JSON})
-    public Response getReactorCollectionAsCj() throws UnsupportedEncodingException {
+    public Response getReactorCollectionAsCj() throws UnsupportedEncodingException, URISyntaxException {
         OperatingReactorDAO operatingReactorDAO = new XLSOperatingReactorDAO();
         OperatingReactorQueryInfo queryInfo = new OperatingReactorQueryInfo();
         List<OperatingReactor> operatingReactors = operatingReactorDAO.getOperatingReactors(queryInfo);
@@ -47,11 +48,15 @@ public class OperatingReactorResource {
                     .path(OperatingReactorResource.class, "getReactorInstanceAsCj")
                     .build(operatingReactor.getDocketNumber());
 
+//            List<Link> links = new ArrayList<>();
+//            links.add(Link.create(new URI(operatingReactor.getWebPage().getUrl()), operatingReactor.getWebPage().getLabel()));
+
             Item item = Item.builder(uri)
                     .addProperty(Property.value("plantName", new Value.StringValue(operatingReactor.getPlantName())))
-                    .addProperty(Property.value("website", new Value.StringValue(operatingReactor.getWebPage())))
                     .addProperty(Property.value("docketNumber", new Value.StringValue(operatingReactor.getDocketNumber())))
+//                    .addLinks(links)
                     .build();
+
             items.add(item);
         }
 
@@ -72,15 +77,15 @@ public class OperatingReactorResource {
     @GET
     @Path("/{docketNumber}")
     @Produces({MediaType.COLLECTION_JSON, javax.ws.rs.core.MediaType.APPLICATION_JSON})
-    public Response getReactorInstanceAsCj(@PathParam("docketNumber") String docketNumber) {
+    public Response getReactorInstanceAsCj(@PathParam("docketNumber") String docketNumber) throws URISyntaxException {
         OperatingReactorDAO operatingReactorDAO = new XLSOperatingReactorDAO();
         OperatingReactor operatingReactor = operatingReactorDAO.getOperatingReactorByDocketNumber(docketNumber);
 
         Collection collection = Collection.builder(uriInfo.getRequestUri())
                 .addItem(Item.builder(uriInfo.getRequestUri())
                         .addProperty(Property.value("plantName", new Value.StringValue(operatingReactor.getPlantName())))
-                        .addProperty(Property.value("website", new Value.StringValue(operatingReactor.getWebPage())))
                         .addProperty(Property.value("docketNumber", new Value.StringValue(operatingReactor.getDocketNumber())))
+                        .addLink(Link.create(new URI(operatingReactor.getWebPage().getUrl()), operatingReactor.getWebPage().getLabel()))
                         .build())
                 .build();
         return Response
