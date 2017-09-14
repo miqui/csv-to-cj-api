@@ -1,12 +1,15 @@
 package me.kuykendall.restfest.hackday.dao;
 
+import me.kuykendall.restfest.hackday.OperatingReactorQueryInfo;
 import me.kuykendall.restfest.hackday.model.OperatingReactor;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class XLSOperatingReactorDAO implements OperatingReactorDAO {
@@ -14,12 +17,18 @@ public class XLSOperatingReactorDAO implements OperatingReactorDAO {
     private static Map<String, OperatingReactor> operatingReactors;
 
     @Override
-    public OperatingReactor getOperatingReactorByDocketNumber(String docketNumber) throws Exception {
+    public OperatingReactor getOperatingReactorByDocketNumber(String docketNumber){
         OperatingReactor reactor = getOperatingReactors().get(docketNumber);
         return reactor;
     }
 
-    private Map<String, OperatingReactor> getOperatingReactors() throws Exception {
+    @Override
+    public List<OperatingReactor> getOperatingReactors(OperatingReactorQueryInfo queryInfo) {
+        List<OperatingReactor> reactors = new ArrayList<>(getOperatingReactors().values());
+        return reactors;
+    }
+
+    private Map<String, OperatingReactor> getOperatingReactors() {
         if (operatingReactors == null) {
             loadDataFromFile();
         }
@@ -27,7 +36,7 @@ public class XLSOperatingReactorDAO implements OperatingReactorDAO {
         return operatingReactors;
     }
 
-    private void loadDataFromFile() throws Exception {
+    private void loadDataFromFile() {
         operatingReactors = new HashMap<>();
         try {
             InputStream myFile = getClass().getClassLoader().getResourceAsStream("../appa.xls");
@@ -43,27 +52,10 @@ public class XLSOperatingReactorDAO implements OperatingReactorDAO {
                 }
 
                 // Process row of sheet
-
                 OperatingReactor operatingReactor = new OperatingReactor();
-
-//                operatingReactor.setPlantName(row.getCell(0).getRichStringCellValue().getString());
                 operatingReactor.setPlantName(formatter.formatCellValue(row.getCell(0)));
-//                operatingReactor.setWebPage(String.valueOf(row.getCell(1).getRichStringCellValue().getString()));
                 operatingReactor.setWebPage(formatter.formatCellValue(row.getCell(1)));
                 operatingReactor.setDocketNumber(formatter.formatCellValue(row.getCell(2)));
-
-//                switch (row.getCell(2).getCellTypeEnum()) {
-//                    case STRING:
-//                    case BLANK:
-//                        operatingReactor.setDocketNumber(row.getCell(2).getRichStringCellValue().getString());
-//                        break;
-//                    case NUMERIC:
-//                        operatingReactor.setDocketNumber(String.valueOf(row.getCell(2).getNumericCellValue()));
-//                        break;
-//                    default:
-//                        throw new Exception("Unsupported cell type for docket number: " + operatingReactor.getDocketNumber() + row.getCell(2).getCellTypeEnum());
-//
-//                }
 
                 if (operatingReactor.getDocketNumber().equals("")) {
                     continue;

@@ -12,7 +12,13 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 
 @RequestScoped
 @Path("/operating-reactor")
@@ -20,6 +26,43 @@ public class OperatingReactorResource {
 
     @Context
     UriInfo uriInfo;
+
+    @GET
+    @Produces({MediaType.COLLECTION_JSON, javax.ws.rs.core.MediaType.APPLICATION_JSON})
+    public Response getReactorCollectionAsCj() throws UnsupportedEncodingException {
+        OperatingReactorDAO operatingReactorDAO = new XLSOperatingReactorDAO();
+        OperatingReactorQueryInfo queryInfo = new OperatingReactorQueryInfo();
+        List<OperatingReactor> operatingReactors = operatingReactorDAO.getOperatingReactors(queryInfo);
+
+
+        List<Item> items = new ArrayList<>();
+        for (OperatingReactor operatingReactor : operatingReactors) {
+
+            String encodedDocketNumber = URLEncoder.encode(operatingReactor.getDocketNumber(), "UTF-8");
+            UriBuilder builder = uriInfo.getAbsolutePathBuilder();
+
+            builder.path(encodedDocketNumber);
+
+            URI uri = uriInfo.getAbsolutePathBuilder()
+                    .path(OperatingReactorResource.class, "getReactorInstanceAsCj")
+                    .build(operatingReactor.getDocketNumber());
+
+            Item item = Item.builder(uri)
+                    .addProperty(Property.value("plantName", new Value.StringValue(operatingReactor.getPlantName())))
+                    .addProperty(Property.value("website", new Value.StringValue(operatingReactor.getWebPage())))
+                    .addProperty(Property.value("docketNumber", new Value.StringValue(operatingReactor.getDocketNumber())))
+                    .build();
+            items.add(item);
+        }
+
+        Collection collection = Collection.builder(uriInfo.getRequestUri())
+                .addItems(items)
+                .build();
+        return Response
+                .ok(collection.toString())
+                .build();
+
+    }
 
     /**
      * Service call that returns an insult in the JSON format.
@@ -29,7 +72,7 @@ public class OperatingReactorResource {
     @GET
     @Path("/{docketNumber}")
     @Produces({MediaType.COLLECTION_JSON, javax.ws.rs.core.MediaType.APPLICATION_JSON})
-    public Response getInsultAsCj(@PathParam("docketNumber") String docketNumber) throws Exception {
+    public Response getReactorInstanceAsCj(@PathParam("docketNumber") String docketNumber) {
         OperatingReactorDAO operatingReactorDAO = new XLSOperatingReactorDAO();
         OperatingReactor operatingReactor = operatingReactorDAO.getOperatingReactorByDocketNumber(docketNumber);
 
